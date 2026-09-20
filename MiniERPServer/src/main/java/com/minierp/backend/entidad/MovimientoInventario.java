@@ -73,7 +73,7 @@ public class MovimientoInventario {
     @Column(name = "observaciones", length = 300)
     private String observaciones;
 
-    protected MovimientoInventario() {
+    public MovimientoInventario() {
     }
 
     @PrePersist

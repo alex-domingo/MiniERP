@@ -42,7 +42,7 @@ public class ConsumoCapa {
     @Column(name = "costo_total", insertable = false, updatable = false, precision = 16, scale = 4)
     private BigDecimal costoTotal;
 
-    protected ConsumoCapa() {
+    public ConsumoCapa() {
     }
 
     public Long getIdConsumo() {

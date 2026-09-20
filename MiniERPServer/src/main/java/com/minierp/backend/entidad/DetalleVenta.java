@@ -47,7 +47,7 @@ public class DetalleVenta {
     @Column(name = "subtotal", insertable = false, updatable = false, precision = 14, scale = 2)
     private BigDecimal subtotal;
 
-    protected DetalleVenta() {
+    public DetalleVenta() {
     }
 
     public Long getIdDetalleVenta() {

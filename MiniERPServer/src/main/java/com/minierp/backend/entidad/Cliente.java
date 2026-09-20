@@ -37,7 +37,7 @@ public class Cliente {
     @Column(name = "fecha_creacion", nullable = false)
     private LocalDateTime fechaCreacion;
 
-    protected Cliente() {
+    public Cliente() {
     }
 
     @PrePersist

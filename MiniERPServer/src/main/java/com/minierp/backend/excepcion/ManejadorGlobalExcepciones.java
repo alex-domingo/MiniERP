@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -96,6 +97,18 @@ public class ManejadorGlobalExcepciones {
                         + "Verifique que los datos no esten duplicados y que las "
                         + "cantidades y montos sean validos.",
                 "integridad", peticion);
+    }
+
+    /**
+     * Credenciales invalidas o cuenta desactivada. Va antes del
+     * manejador generico porque, de lo contrario, este lo convertiria
+     * en un 500 y el cliente no sabria que el problema fue el login.
+     */
+    @ExceptionHandler(AuthenticationException.class)
+    public ProblemDetail manejarAutenticacion(AuthenticationException ex,
+                                              HttpServletRequest peticion) {
+        return construir(HttpStatus.UNAUTHORIZED, "Autenticacion fallida",
+                ex.getMessage(), "credenciales-invalidas", peticion);
     }
 
     @ExceptionHandler(Exception.class)

@@ -53,7 +53,7 @@ public class Producto {
     @Column(name = "fecha_creacion", nullable = false)
     private LocalDateTime fechaCreacion;
 
-    protected Producto() {
+    public Producto() {
     }
 
     @PrePersist

@@ -50,7 +50,7 @@ public class Compra {
     @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetalleCompra> detalles = new ArrayList<>();
 
-    protected Compra() {
+    public Compra() {
     }
 
     @PrePersist

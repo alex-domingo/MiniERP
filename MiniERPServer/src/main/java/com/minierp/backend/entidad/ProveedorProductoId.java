@@ -19,7 +19,7 @@ public class ProveedorProductoId implements Serializable {
     @Column(name = "id_producto")
     private Long idProducto;
 
-    protected ProveedorProductoId() {
+    public ProveedorProductoId() {
     }
 
     public ProveedorProductoId(Long idProveedor, Long idProducto) {

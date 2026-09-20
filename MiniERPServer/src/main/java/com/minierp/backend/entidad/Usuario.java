@@ -48,7 +48,7 @@ public class Usuario {
     @Column(name = "ultimo_acceso")
     private LocalDateTime ultimoAcceso;
 
-    protected Usuario() {
+    public Usuario() {
     }
 
     /**

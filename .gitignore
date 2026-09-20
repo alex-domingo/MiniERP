@@ -25,3 +25,8 @@ MiniERPClient/tmp/
 *.njsproj
 *.sln
 *.sw?
+
+# ==========================================
+# HERRAMIENTAS
+# ==========================================
+herramientas/

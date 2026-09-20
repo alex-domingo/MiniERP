@@ -45,7 +45,7 @@ public class CapaInventario {
     @Column(name = "cantidad_disponible", nullable = false)
     private Integer cantidadDisponible;
 
-    protected CapaInventario() {
+    public CapaInventario() {
     }
 
     /** Consume unidades de esta capa. Devuelve cuantas alcanzo a tomar. */

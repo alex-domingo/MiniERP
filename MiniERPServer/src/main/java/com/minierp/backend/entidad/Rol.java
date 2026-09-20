@@ -23,7 +23,7 @@ public class Rol {
     @Column(name = "descripcion", nullable = false, length = 200)
     private String descripcion;
 
-    protected Rol() {
+    public Rol() {
     }
 
     public Short getIdRol() {

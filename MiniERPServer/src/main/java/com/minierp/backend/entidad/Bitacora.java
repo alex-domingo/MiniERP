@@ -59,7 +59,7 @@ public class Bitacora {
     @Column(name = "fecha_hora", nullable = false)
     private LocalDateTime fechaHora;
 
-    protected Bitacora() {
+    public Bitacora() {
     }
 
     @PrePersist

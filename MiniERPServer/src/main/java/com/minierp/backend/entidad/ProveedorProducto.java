@@ -39,7 +39,7 @@ public class ProveedorProducto {
     @Column(name = "fecha_asociacion", nullable = false)
     private LocalDateTime fechaAsociacion;
 
-    protected ProveedorProducto() {
+    public ProveedorProducto() {
     }
 
     @PrePersist

@@ -41,7 +41,7 @@ public class Proveedor {
     @Column(name = "fecha_creacion", nullable = false)
     private LocalDateTime fechaCreacion;
 
-    protected Proveedor() {
+    public Proveedor() {
     }
 
     @PrePersist

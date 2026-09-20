@@ -2,6 +2,7 @@ package com.minierp.backend;
 
 import com.minierp.backend.config.PropiedadesEmpresa;
 import com.minierp.backend.config.PropiedadesNegocio;
+import com.minierp.backend.config.PropiedadesSeguridad;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -15,7 +16,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
  * de alterar la base en caliente.
  */
 @SpringBootApplication
-@EnableConfigurationProperties({PropiedadesNegocio.class, PropiedadesEmpresa.class})
+@EnableConfigurationProperties({PropiedadesNegocio.class, PropiedadesEmpresa.class,
+        PropiedadesSeguridad.class})
 public class MiniErpApplication {
 
     public static void main(String[] args) {

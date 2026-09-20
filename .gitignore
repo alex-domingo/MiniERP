@@ -1,0 +1,27 @@
+# ==========================================
+# EXCLUSIONES PARA EL BACKEND (MiniERPServer)
+# ==========================================
+MiniERPServer/target/
+MiniERPServer/.mvn/
+MiniERPServer/nbproject/private/
+MiniERPServer/nbbuild/
+MiniERPServer/dist/
+
+# ==========================================
+# EXCLUSIONES PARA EL FRONTEND (MiniERPClient)
+# ==========================================
+MiniERPClient/node_modules/
+MiniERPClient/.angular/
+MiniERPClient/dist/
+MiniERPClient/tmp/
+
+# ==========================================
+# CONFIGURACIONES GENERALES DE IDES
+# ==========================================
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

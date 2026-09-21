@@ -15,6 +15,10 @@ import java.time.LocalDateTime;
  *
  * Sin estas capas, UEPS seria imposible: un simple contador de
  * existencias no sabe a que costo entro cada unidad.
+ *
+ * Origen (V3): cada capa nace de UNA linea de compra o de UN ajuste de
+ * entrada, nunca de ambos ni de ninguno. La base lo exige con
+ * ck_capa_origen.
  */
 @Entity
 @Table(name = "capa_inventario")
@@ -29,9 +33,13 @@ public class CapaInventario {
     @JoinColumn(name = "id_producto", nullable = false)
     private Producto producto;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_detalle_compra", nullable = false, unique = true)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_detalle_compra", unique = true)
     private DetalleCompra detalleCompra;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_movimiento_ajuste", unique = true)
+    private MovimientoInventario movimientoAjuste;
 
     @Column(name = "fecha_entrada", nullable = false)
     private LocalDateTime fechaEntrada;
@@ -82,6 +90,14 @@ public class CapaInventario {
 
     public void setDetalleCompra(DetalleCompra detalleCompra) {
         this.detalleCompra = detalleCompra;
+    }
+
+    public MovimientoInventario getMovimientoAjuste() {
+        return movimientoAjuste;
+    }
+
+    public void setMovimientoAjuste(MovimientoInventario movimientoAjuste) {
+        this.movimientoAjuste = movimientoAjuste;
     }
 
     public LocalDateTime getFechaEntrada() {

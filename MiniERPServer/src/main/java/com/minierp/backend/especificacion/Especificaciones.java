@@ -62,6 +62,28 @@ public final class Especificaciones {
         };
     }
 
+    /**
+     * Filtra un atributo de fecha y hora dentro de [desde, hasta). Ambos
+     * extremos son opcionales. El extremo final es exclusivo para que
+     * "hasta el 31" incluya todo el dia 31 sin trucos con 23:59:59.
+     */
+    public static <T> Specification<T> entre(String campo, java.time.LocalDateTime desde,
+                                             java.time.LocalDateTime hasta) {
+        if (desde == null && hasta == null) {
+            return Specification.unrestricted();
+        }
+        return (raiz, consulta, cb) -> {
+            List<Predicate> condiciones = new ArrayList<>();
+            if (desde != null) {
+                condiciones.add(cb.greaterThanOrEqualTo(raiz.get(campo), desde));
+            }
+            if (hasta != null) {
+                condiciones.add(cb.lessThan(raiz.get(campo), hasta));
+            }
+            return cb.and(condiciones.toArray(Predicate[]::new));
+        };
+    }
+
     private static String escapar(String texto) {
         return texto.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
     }

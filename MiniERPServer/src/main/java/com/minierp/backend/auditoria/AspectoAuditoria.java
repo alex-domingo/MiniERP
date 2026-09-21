@@ -96,7 +96,8 @@ public class AspectoAuditoria {
 
     /** Componentes que identifican a un recurso ante una persona, en orden. */
     private static final String[] CAMPOS_ETIQUETA =
-            {"codigo", "codigoProducto", "nit", "nombre", "nombreProducto"};
+            {"numeroDocumento", "numeroFactura", "codigo", "codigoProducto", "nit",
+             "nombre", "nombreProducto", "nombreProveedor", "nombreCliente"};
 
     /**
      * Arma una etiqueta legible con el codigo o NIT y el nombre del

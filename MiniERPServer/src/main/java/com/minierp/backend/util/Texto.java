@@ -51,4 +51,17 @@ public final class Texto {
 
     /** Patron comun para @Pattern de los DTO que reciben NIT. */
     public static final String PATRON_NIT = "^\\s*(?i:CF|[0-9]{1,15}\\s*-?\\s*[0-9K])\\s*$";
+
+    /**
+     * Patron para buscar "contiene" con LIKE/ILIKE en SQL nativo, con los
+     * comodines del usuario escapados (buscar "10%" busca literalmente
+     * "10%"). Devuelve null si no hay texto que buscar.
+     */
+    public static String patronContiene(String valor) {
+        String limpio = limpiar(valor);
+        if (limpio == null) {
+            return null;
+        }
+        return "%" + limpio.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%";
+    }
 }

@@ -35,7 +35,11 @@ import java.util.List;
  *   VENTAS          clientes y ventas
  *
  * Inventario puede LEER compras y ventas porque necesita rastrear el
- * origen de cada movimiento del kardex.
+ * origen de cada movimiento del kardex. Ventas no lee el kardex ni la
+ * valuacion porque exponen costos.
+ *
+ * Reportes: cada area consulta los de su ambito y Administracion todos;
+ * el de logs es exclusivo de Administracion.
  *
  * Criterio general: la lectura se reparte segun quien necesita la
  * informacion; la escritura queda restringida al area duena del dato.
@@ -62,8 +66,9 @@ public class ConfiguracionSeguridad {
     }
 
     /**
-     * BCrypt con factor 10, que es el que uso la carga inicial. Subirlo
-     * invalidaria los hash ya almacenados en la migracion V2.
+     * BCrypt con factor 10, el mismo de la carga inicial. Cada hash guarda
+     * su propio factor ("$2a$10$..."), asi que subirlo no invalidaria las
+     * contrasenas existentes: solo haria mas costosas las nuevas.
      */
     @Bean
     public PasswordEncoder codificadorContrasena() {
@@ -120,6 +125,10 @@ public class ConfiguracionSeguridad {
                         // --- Clientes y ventas: los maneja Ventas ---
                         .requestMatchers(HttpMethod.GET, "/api/clientes/**")
                             .hasAnyRole(ADMIN, VENTAS)
+                        //     La factura es un documento para el cliente: la emiten
+                        //     Ventas y Administracion, no Inventario.
+                        .requestMatchers(HttpMethod.GET, "/api/ventas/*/factura")
+                            .hasAnyRole(ADMIN, VENTAS)
                         .requestMatchers(HttpMethod.GET, "/api/ventas/**")
                             .hasAnyRole(ADMIN, VENTAS, INVENTARIO)
                         .requestMatchers("/api/clientes/**").hasRole(VENTAS)
@@ -132,8 +141,16 @@ public class ConfiguracionSeguridad {
                             .hasAnyRole(ADMIN, COMPRAS, INVENTARIO)
                         .requestMatchers("/api/inventario/**").hasRole(INVENTARIO)
 
-                        // --- Reportes: el servicio filtra segun el rol ---
-                        .requestMatchers("/api/reportes/**").authenticated()
+                        // --- Reportes: cada area ve los suyos; Administracion, todos ---
+                        .requestMatchers(HttpMethod.GET, "/api/reportes/inventario/**")
+                            .hasAnyRole(ADMIN, INVENTARIO)
+                        .requestMatchers(HttpMethod.GET, "/api/reportes/compras/**")
+                            .hasAnyRole(ADMIN, COMPRAS)
+                        .requestMatchers(HttpMethod.GET, "/api/reportes/ventas/**")
+                            .hasAnyRole(ADMIN, VENTAS)
+                        .requestMatchers(HttpMethod.GET, "/api/reportes/bitacora/**")
+                            .hasRole(ADMIN)
+                        .requestMatchers("/api/reportes/**").denyAll()
 
                         .anyRequest().authenticated())
 

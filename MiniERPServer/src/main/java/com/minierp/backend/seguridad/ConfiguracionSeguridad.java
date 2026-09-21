@@ -125,9 +125,11 @@ public class ConfiguracionSeguridad {
                         .requestMatchers("/api/clientes/**").hasRole(VENTAS)
                         .requestMatchers("/api/ventas/**").hasRole(VENTAS)
 
-                        // --- Inventario: lo consulta todo el mundo,
-                        //     lo ajusta solo el area de Inventario ---
-                        .requestMatchers(HttpMethod.GET, "/api/inventario/**").authenticated()
+                        // --- Inventario: kardex y valuacion exponen COSTOS, asi que
+                        //     Ventas no los lee (consulta existencias en /api/productos).
+                        //     Solo el area de Inventario registra ajustes. ---
+                        .requestMatchers(HttpMethod.GET, "/api/inventario/**")
+                            .hasAnyRole(ADMIN, COMPRAS, INVENTARIO)
                         .requestMatchers("/api/inventario/**").hasRole(INVENTARIO)
 
                         // --- Reportes: el servicio filtra segun el rol ---

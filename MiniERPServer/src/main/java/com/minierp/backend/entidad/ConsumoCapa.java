@@ -14,6 +14,9 @@ import java.math.BigDecimal;
  * meses despues.
  *
  * costoTotal es columna generada por PostgreSQL.
+ *
+ * Origen (V3): cada consumo corresponde a UNA linea de venta o a UN
+ * ajuste de salida. La base lo exige con ck_consumo_origen.
  */
 @Entity
 @Table(name = "consumo_capa")
@@ -28,9 +31,13 @@ public class ConsumoCapa {
     @JoinColumn(name = "id_capa", nullable = false)
     private CapaInventario capa;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_detalle_venta", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_detalle_venta")
     private DetalleVenta detalleVenta;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_movimiento_ajuste")
+    private MovimientoInventario movimientoAjuste;
 
     @Column(name = "cantidad", nullable = false)
     private Integer cantidad;
@@ -67,6 +74,14 @@ public class ConsumoCapa {
 
     public void setDetalleVenta(DetalleVenta detalleVenta) {
         this.detalleVenta = detalleVenta;
+    }
+
+    public MovimientoInventario getMovimientoAjuste() {
+        return movimientoAjuste;
+    }
+
+    public void setMovimientoAjuste(MovimientoInventario movimientoAjuste) {
+        this.movimientoAjuste = movimientoAjuste;
     }
 
     public Integer getCantidad() {

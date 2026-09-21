@@ -34,6 +34,12 @@ public final class Paginacion {
      */
     public static Pageable crear(int pagina, int tamano, String orden,
                                  Set<String> permitidos, String porDefecto, String campoId) {
+        return crear(pagina, tamano, orden, permitidos, porDefecto, Sort.Direction.ASC, campoId);
+    }
+
+    /** Variante con direccion por defecto, para listados donde lo natural es "mas reciente primero". */
+    public static Pageable crear(int pagina, int tamano, String orden, Set<String> permitidos,
+                                 String porDefecto, Sort.Direction direccionPorDefecto, String campoId) {
         if (pagina < 0) {
             throw new SolicitudInvalidaException("La pagina no puede ser negativa");
         }
@@ -43,7 +49,7 @@ public final class Paginacion {
         }
 
         String campo = porDefecto;
-        Sort.Direction direccion = Sort.Direction.ASC;
+        Sort.Direction direccion = direccionPorDefecto;
 
         if (orden != null && !orden.isBlank()) {
             String[] partes = orden.split(",");
@@ -64,7 +70,7 @@ public final class Paginacion {
 
         Sort sort = Sort.by(direccion, campo);
         if (!campo.equals(campoId)) {
-            sort = sort.and(Sort.by(Sort.Direction.ASC, campoId));
+            sort = sort.and(Sort.by(direccion, campoId));
         }
         return PageRequest.of(pagina, tamano, sort);
     }

@@ -76,7 +76,7 @@ public class ServicioReportesInventario {
                 DataClassRowMapper.newInstance(MasVendido.class));
         var f = filtros("idCategoria", idCategoria, "limite", n);
         rango.agregarA(f);
-        return respuesta("Top " + n + " productos mas vendidos", f, null, filas, null);
+        return respuesta("Top " + n + " productos más vendidos", f, null, filas, null);
     }
 
     // -----------------------------------------------------------------

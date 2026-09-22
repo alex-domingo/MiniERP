@@ -1,0 +1,54 @@
+<mat-sidenav-container class="contenedor">
+  <mat-sidenav #lateral [mode]="movil() ? 'over' : 'side'" [opened]="!movil()" class="lateral no-imprimir">
+    <div class="marca">
+      <mat-icon>storefront</mat-icon>
+      <div>
+        <div class="nombre">Mini ERP</div>
+        <div class="lema">Muebles para hogar y oficina</div>
+      </div>
+    </div>
+    <mat-nav-list>
+      @for (grupo of menu(); track $index) {
+        @if (grupo.titulo) {
+          <div class="grupo">{{ grupo.titulo }}</div>
+        }
+        @for (o of grupo.opciones; track o.ruta) {
+          <a mat-list-item [routerLink]="o.ruta" routerLinkActive="activo"
+             [routerLinkActiveOptions]="{ exact: o.ruta === '/reportes' }">
+            <mat-icon matListItemIcon>{{ o.icono }}</mat-icon>
+            <span matListItemTitle>{{ o.texto }}</span>
+          </a>
+        }
+      }
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <mat-toolbar class="barra no-imprimir">
+      <button mat-icon-button (click)="lateral.toggle()" aria-label="Mostrar u ocultar el menú">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span class="espacio"></span>
+      @if (sesion.usuario(); as u) {
+        <button mat-button [matMenuTriggerFor]="menuUsuario" class="usuario">
+          <mat-icon>account_circle</mat-icon>
+          <span class="texto-usuario">{{ u.nombreCompleto }}</span>
+          <span class="area">{{ area() }}</span>
+        </button>
+        <mat-menu #menuUsuario="matMenu" xPosition="before">
+          <div class="info-usuario" (click)="$event.stopPropagation()">
+            <strong>{{ u.nombreCompleto }}</strong>
+            <span class="muted">{{ u.usuario }} · área de {{ area() }}</span>
+          </div>
+          <mat-divider />
+          <button mat-menu-item (click)="sesion.cerrar()">
+            <mat-icon>logout</mat-icon>Cerrar sesión
+          </button>
+        </mat-menu>
+      }
+    </mat-toolbar>
+    <main>
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

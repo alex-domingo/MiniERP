@@ -1,0 +1,58 @@
+<div class="pagina">
+  <div class="encabezado">
+    <div>
+      <h1>Compras</h1>
+      <p class="subtitulo">Abastecimiento: cada compra suma existencias y crea una capa de costo</p>
+    </div>
+    <span class="espacio"></span>
+    @if (puedeRegistrar) {
+      <a mat-flat-button routerLink="/compras/nueva"><mat-icon>add_shopping_cart</mat-icon>Nueva compra</a>
+    }
+  </div>
+
+  <div class="filtros">
+    <mat-form-field class="ancho">
+      <mat-label>Proveedor</mat-label>
+      <mat-select [value]="idProveedor()" (selectionChange)="filtrarProveedor($event.value)">
+        <mat-option [value]="null">Todos</mat-option>
+        @for (p of proveedores(); track p.idProveedor) {
+          <mat-option [value]="p.idProveedor">{{ p.nombre }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <app-rango-fechas (cambio)="filtrarFechas($event)" />
+  </div>
+
+  <div class="tabla-contenedor">
+    @if (cargando()) { <mat-progress-bar mode="indeterminate" class="cargando-barra" /> }
+    <table mat-table [dataSource]="filas()" matSort matSortActive="fechaCompra" matSortDirection="desc"
+           (matSortChange)="ordenar($event)">
+      <ng-container matColumnDef="numeroDocumento">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Documento</th>
+        <td mat-cell *matCellDef="let c" class="nowrap">{{ c.numeroDocumento }}</td>
+      </ng-container>
+      <ng-container matColumnDef="fechaCompra">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha</th>
+        <td mat-cell *matCellDef="let c" class="nowrap">{{ c.fechaCompra | date: 'dd/MM/yyyy HH:mm' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="proveedor">
+        <th mat-header-cell *matHeaderCellDef>Proveedor</th>
+        <td mat-cell *matCellDef="let c">{{ c.nombreProveedor }}</td>
+      </ng-container>
+      <ng-container matColumnDef="usuario">
+        <th mat-header-cell *matHeaderCellDef>Registró</th>
+        <td mat-cell *matCellDef="let c" class="muted">{{ c.usuario }}</td>
+      </ng-container>
+      <ng-container matColumnDef="total">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header arrowPosition="before" class="num">Total</th>
+        <td mat-cell *matCellDef="let c" class="num">{{ c.total | moneda }}</td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+      <tr mat-row *matRowDef="let c; columns: columnas" class="clicable" (click)="ver(c)" (keydown.enter)="ver(c)" tabindex="0"></tr>
+      <tr class="mat-row" *matNoDataRow><td class="vacio" [attr.colspan]="columnas.length">
+        {{ cargando() ? 'Cargando…' : 'No hay compras con estos filtros' }}</td></tr>
+    </table>
+    <mat-paginator [length]="total()" [pageIndex]="pagina()" [pageSize]="tamano()" [pageSizeOptions]="[10, 20, 50]"
+                   (page)="cambiarPagina($event)" />
+  </div>
+</div>

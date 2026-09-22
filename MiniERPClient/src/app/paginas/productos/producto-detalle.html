@@ -1,0 +1,97 @@
+<div class="pagina">
+  @if (producto(); as p) {
+    <div class="encabezado">
+      <button mat-icon-button routerLink="/productos" aria-label="Volver a productos"><mat-icon>arrow_back</mat-icon></button>
+      <div>
+        <h1>{{ p.codigo }} · {{ p.nombre }}</h1>
+        <p class="subtitulo">{{ p.nombreCategoria }}{{ p.activo ? '' : ' · inactivo' }}</p>
+      </div>
+      <span class="espacio"></span>
+      @if (verInventario) {
+        <a mat-stroked-button [routerLink]="['/inventario/kardex']" [queryParams]="{ producto: p.idProducto }">
+          <mat-icon>receipt_long</mat-icon>Kardex completo
+        </a>
+      }
+      @if (puedeEditar) {
+        <button mat-flat-button (click)="editar()"><mat-icon>edit</mat-icon>Editar</button>
+      }
+    </div>
+
+    <div class="rejilla" style="margin-bottom:16px">
+      <div class="tarjeta indicador">
+        <div class="etiqueta">Existencia</div>
+        <div class="valor">{{ p.stockActual }} <small class="muted">{{ p.unidadMedida | lowercase }}</small></div>
+        <div class="detalle"><app-existencia [stock]="p.stockActual" [minimo]="p.stockMinimo" /></div>
+      </div>
+      <div class="tarjeta indicador">
+        <div class="etiqueta">Stock mínimo</div>
+        <div class="valor">{{ p.stockMinimo }}</div>
+        <div class="detalle">Nivel que dispara la alerta</div>
+      </div>
+      <div class="tarjeta indicador">
+        <div class="etiqueta">Precio de venta</div>
+        <div class="valor">{{ p.precioVenta | moneda }}</div>
+        <div class="detalle">Sin IVA</div>
+      </div>
+    </div>
+
+    @if (p.descripcion) {
+      <div class="tarjeta" style="margin-bottom:16px"><h2>Descripción</h2><p style="margin:0">{{ p.descripcion }}</p></div>
+    }
+
+    <div class="rejilla-2">
+      @if (verProveedores) {
+        <div class="tarjeta">
+          <h2>Proveedores que lo suministran</h2>
+          @if (proveedores().length) {
+            <table mat-table [dataSource]="proveedores()">
+              <ng-container matColumnDef="nombre">
+                <th mat-header-cell *matHeaderCellDef>Proveedor</th>
+                <td mat-cell *matCellDef="let r"><a [routerLink]="['/proveedores', r.idProveedor]">{{ r.nombreProveedor }}</a></td>
+              </ng-container>
+              <ng-container matColumnDef="costo">
+                <th mat-header-cell *matHeaderCellDef class="num">Costo de referencia</th>
+                <td mat-cell *matCellDef="let r" class="num">{{ r.costoReferencia | moneda }}</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="['nombre', 'costo']"></tr>
+              <tr mat-row *matRowDef="let r; columns: ['nombre', 'costo']"></tr>
+            </table>
+          } @else {
+            <p class="vacio">Ningún proveedor tiene asociado este producto.</p>
+          }
+        </div>
+      }
+      @if (verInventario) {
+        <div class="tarjeta">
+          <h2>Últimos movimientos</h2>
+          @if (movimientos().length) {
+            <table mat-table [dataSource]="movimientos()">
+              <ng-container matColumnDef="fecha">
+                <th mat-header-cell *matHeaderCellDef>Fecha</th>
+                <td mat-cell *matCellDef="let m" class="nowrap">{{ m.fechaMovimiento | date: 'dd/MM/yyyy' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="origen">
+                <th mat-header-cell *matHeaderCellDef>Origen</th>
+                <td mat-cell *matCellDef="let m">{{ etiqueta(m.origen) }} <span class="muted">{{ m.documento }}</span></td>
+              </ng-container>
+              <ng-container matColumnDef="cantidad">
+                <th mat-header-cell *matHeaderCellDef class="num">Cantidad</th>
+                <td mat-cell *matCellDef="let m" class="num">{{ m.tipoMovimiento === 'ENTRADA' ? '+' : '−' }}{{ m.cantidad }}</td>
+              </ng-container>
+              <ng-container matColumnDef="saldo">
+                <th mat-header-cell *matHeaderCellDef class="num">Saldo</th>
+                <td mat-cell *matCellDef="let m" class="num">{{ m.existenciaNueva }}</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="['fecha', 'origen', 'cantidad', 'saldo']"></tr>
+              <tr mat-row *matRowDef="let m; columns: ['fecha', 'origen', 'cantidad', 'saldo']"></tr>
+            </table>
+          } @else {
+            <p class="vacio">Sin movimientos registrados.</p>
+          }
+        </div>
+      }
+    </div>
+  } @else {
+    <mat-progress-bar mode="indeterminate" />
+  }
+</div>

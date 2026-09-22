@@ -1,0 +1,214 @@
+@if (def) {
+<div class="pagina">
+  <div class="encabezado">
+    <button mat-icon-button routerLink="/reportes" aria-label="Volver a reportes" class="no-imprimir"><mat-icon>arrow_back</mat-icon></button>
+    <div>
+      <h1>{{ resultado()?.titulo ?? def.titulo }}</h1>
+      <p class="subtitulo">{{ def.descripcion }}</p>
+    </div>
+    <span class="espacio"></span>
+    @if (resultado()) {
+      <button mat-stroked-button (click)="exportar()" class="no-imprimir">
+        <mat-icon>download</mat-icon>CSV{{ def.paginado ? ' (esta página)' : '' }}
+      </button>
+      <button mat-stroked-button (click)="imprimir()" class="no-imprimir"><mat-icon>print</mat-icon>Imprimir</button>
+    }
+  </div>
+
+  <!-- Filtros: siempre en una fila, arriba de lo que filtran -->
+  <form class="filtros no-imprimir" [formGroup]="filtros" (ngSubmit)="generar()">
+    @if (tiene('producto')) {
+      <app-buscador-producto etiqueta="Producto" clase="muy-ancho" [soloActivos]="false" (elegido)="elegirProducto($event)" />
+    }
+    @if (tiene('fechas') || tiene('fechasObligatorias')) {
+      <mat-form-field style="width:260px">
+        <mat-label>Periodo{{ tiene('fechasObligatorias') ? '' : ' (opcional)' }}</mat-label>
+        <mat-date-range-input [rangePicker]="rango">
+          <input matStartDate formControlName="desde" placeholder="Desde">
+          <input matEndDate formControlName="hasta" placeholder="Hasta">
+        </mat-date-range-input>
+        <mat-datepicker-toggle matIconSuffix [for]="rango" />
+        <mat-date-range-picker #rango />
+      </mat-form-field>
+    }
+    @if (tiene('categoria')) {
+      <mat-form-field>
+        <mat-label>Categoría</mat-label>
+        <mat-select formControlName="idCategoria">
+          <mat-option [value]="null">Todas</mat-option>
+          @for (o of categorias(); track o.id) { <mat-option [value]="o.id">{{ o.nombre }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+    }
+    @if (tiene('proveedor')) {
+      <mat-form-field class="ancho">
+        <mat-label>Proveedor</mat-label>
+        <mat-select formControlName="idProveedor">
+          <mat-option [value]="null">Todos</mat-option>
+          @for (o of proveedores(); track o.id) { <mat-option [value]="o.id">{{ o.nombre }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+    }
+    @if (tiene('cliente')) {
+      <mat-form-field class="ancho">
+        <mat-label>Cliente</mat-label>
+        <mat-select formControlName="idCliente">
+          <mat-option [value]="null">Todos</mat-option>
+          @for (o of clientes(); track o.id) { <mat-option [value]="o.id">{{ o.nombre }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+    }
+    @if (tiene('agrupacion')) {
+      <mat-form-field class="angosto" style="width:150px">
+        <mat-label>Agrupar por</mat-label>
+        <mat-select formControlName="agrupacion">
+          @for (a of agrupaciones; track a) { <mat-option [value]="a">{{ etiqueta(a) }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+    }
+    @if (tiene('tipoMovimiento')) {
+      <mat-form-field class="angosto" style="width:150px">
+        <mat-label>Tipo</mat-label>
+        <mat-select formControlName="tipo">
+          <mat-option [value]="null">Todos</mat-option>
+          <mat-option value="ENTRADA">Entradas</mat-option>
+          <mat-option value="SALIDA">Salidas</mat-option>
+        </mat-select>
+      </mat-form-field>
+    }
+    @if (tiene('origen')) {
+      <mat-form-field>
+        <mat-label>Origen</mat-label>
+        <mat-select formControlName="origen">
+          <mat-option [value]="null">Todos</mat-option>
+          @for (o of origenes; track o) { <mat-option [value]="o">{{ etiqueta(o) }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+    }
+    @if (tiene('usuario')) {
+      <mat-form-field class="angosto" style="width:150px">
+        <mat-label>Usuario</mat-label>
+        <input matInput formControlName="usuario" placeholder="contiene…">
+      </mat-form-field>
+    }
+    @if (tiene('modulo')) {
+      <mat-form-field>
+        <mat-label>Módulo</mat-label>
+        <mat-select formControlName="modulo">
+          <mat-option [value]="null">Todos</mat-option>
+          @for (m of modulos; track m) { <mat-option [value]="m">{{ etiqueta(m) }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+    }
+    @if (tiene('accion')) {
+      <mat-form-field>
+        <mat-label>Acción</mat-label>
+        <mat-select formControlName="accion">
+          <mat-option [value]="null">Todas</mat-option>
+          @for (a of acciones; track a) { <mat-option [value]="a">{{ etiqueta(a) }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+    }
+    @if (tiene('exitoso')) {
+      <mat-form-field class="angosto" style="width:140px">
+        <mat-label>Resultado</mat-label>
+        <mat-select formControlName="exitoso">
+          <mat-option [value]="null">Todos</mat-option>
+          <mat-option [value]="true">Exitosos</mat-option>
+          <mat-option [value]="false">Fallidos</mat-option>
+        </mat-select>
+      </mat-form-field>
+    }
+    @if (tiene('texto')) {
+      <mat-form-field>
+        <mat-label>Texto en la descripción</mat-label>
+        <input matInput formControlName="texto">
+      </mat-form-field>
+    }
+    @if (tiene('limite')) {
+      <mat-form-field class="angosto">
+        <mat-label>Mostrar</mat-label>
+        <input matInput type="number" formControlName="limite" min="1" max="100">
+        <mat-error>Entre 1 y 100</mat-error>
+      </mat-form-field>
+    }
+    @if (tiene('soloAlertas')) {
+      <mat-checkbox formControlName="soloAlertas">Solo en alerta</mat-checkbox>
+    }
+    <button mat-flat-button type="submit" [disabled]="cargando()"><mat-icon>play_arrow</mat-icon>Generar</button>
+  </form>
+
+  @if (cargando()) { <mat-progress-bar mode="indeterminate" style="margin-bottom:12px" /> }
+
+  @if (resultado(); as r) {
+    <!-- Encabezado del reporte impreso -->
+    <div class="solo-impresion" style="margin-bottom:12px">
+      <strong>Mini ERP · {{ r.titulo }}</strong><br>
+      <small>Generado el {{ r.generado | date: 'dd/MM/yyyy HH:mm' }} por {{ r.generadoPor }}</small>
+    </div>
+    <p class="muted" style="margin:0 0 12px">
+      <mat-icon style="font-size:16px; width:16px; height:16px; vertical-align:-3px">filter_alt</mat-icon>
+      {{ descripcionFiltros() || 'Sin filtros' }} · generado {{ r.generado | date: 'dd/MM/yyyy HH:mm' }} por {{ r.generadoPor }}
+    </p>
+
+    @if (def.resumen && r.resumen) {
+      <div class="rejilla" style="margin-bottom:16px; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr))">
+        @for (c of def.resumen; track c.campo) {
+          <div class="tarjeta indicador">
+            <div class="etiqueta">{{ c.titulo }}</div>
+            <div class="valor" style="font-size:22px">{{ valorResumen(c) }}</div>
+          </div>
+        }
+      </div>
+    }
+
+    @if (conteos(); as k) {
+      <div class="rejilla-2" style="margin-bottom:16px">
+        <div class="tarjeta"><h2>Interacciones por módulo</h2><app-grafica-barras [datos]="k.modulo" formato="entero" /></div>
+        <div class="tarjeta"><h2>Interacciones por usuario</h2><app-grafica-barras [datos]="k.usuario" formato="entero" /></div>
+      </div>
+    }
+
+    @if (def.grafica && r.filas.length) {
+      <div class="tarjeta" style="margin-bottom:16px">
+        <h2>{{ def.grafica.titulo }}</h2>
+        @if (def.grafica.tipo === 'barras') {
+          <app-grafica-barras [datos]="datosGrafica()" [formato]="def.grafica.formato" />
+        } @else {
+          <app-grafica-columnas [datos]="datosGrafica()" [formato]="def.grafica.formato" />
+        }
+      </div>
+    }
+
+    <div class="tabla-contenedor">
+      <table mat-table [dataSource]="r.filas">
+        @for (c of def.columnas; track c.campo) {
+          <ng-container [matColumnDef]="c.campo">
+            <th mat-header-cell *matHeaderCellDef [class.num]="esNumero(c.tipo)">{{ c.titulo }}</th>
+            <td mat-cell *matCellDef="let f" [class.num]="esNumero(c.tipo)"
+                [class.nowrap]="c.tipo === 'fecha' || c.tipo === 'fechaHora' || c.tipo === 'clave'">
+              @switch (c.tipo) {
+                @case ('nivel') { <span [class]="claseNivel(f[c.campo])">{{ formatear(f[c.campo], c.tipo) }}</span> }
+                @case ('booleano') {
+                  <span class="estado" [class.ok]="f[c.campo]" [class.critico]="!f[c.campo]">{{ formatear(f[c.campo], c.tipo) }}</span>
+                }
+                @default { {{ formatear(f[c.campo], c.tipo) }} }
+              }
+            </td>
+          </ng-container>
+        }
+        <tr mat-header-row *matHeaderRowDef="columnasVisibles()"></tr>
+        <tr mat-row *matRowDef="let f; columns: columnasVisibles()"></tr>
+        <tr class="mat-row" *matNoDataRow><td class="vacio" [attr.colspan]="def.columnas.length">
+          No hay datos con estos filtros</td></tr>
+      </table>
+      @if (def.paginado && r.pagina) {
+        <mat-paginator [length]="r.pagina.totalElementos" [pageIndex]="pagina()" [pageSize]="tamano()"
+                       [pageSizeOptions]="[25, 50, 100]" (page)="cambiarPagina($event)" />
+      }
+    </div>
+  } @else if (tiene('producto') && !producto()) {
+    <div class="tarjeta vacio">Elija un producto para ver su historial de movimientos.</div>
+  }
+</div>
+}

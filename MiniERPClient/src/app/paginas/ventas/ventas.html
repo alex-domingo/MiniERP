@@ -1,0 +1,66 @@
+<div class="pagina">
+  <div class="encabezado">
+    <div>
+      <h1>Ventas</h1>
+      <p class="subtitulo">Cada venta descuenta existencias con el método UEPS y emite su factura</p>
+    </div>
+    <span class="espacio"></span>
+    @if (puedeRegistrar) {
+      <a mat-flat-button routerLink="/ventas/nueva"><mat-icon>point_of_sale</mat-icon>Nueva venta</a>
+    }
+  </div>
+
+  <div class="filtros">
+    <mat-form-field class="ancho">
+      <mat-label>Cliente</mat-label>
+      <mat-select [value]="idCliente()" (selectionChange)="filtrarCliente($event.value)">
+        <mat-option [value]="null">Todos</mat-option>
+        @for (c of clientes(); track c.idCliente) {
+          <mat-option [value]="c.idCliente">{{ c.nombre }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <app-rango-fechas (cambio)="filtrarFechas($event)" />
+  </div>
+
+  <div class="tabla-contenedor">
+    @if (cargando()) { <mat-progress-bar mode="indeterminate" class="cargando-barra" /> }
+    <table mat-table [dataSource]="filas()" matSort matSortActive="fechaVenta" matSortDirection="desc"
+           (matSortChange)="ordenar($event)">
+      <ng-container matColumnDef="numeroFactura">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Factura</th>
+        <td mat-cell *matCellDef="let v" class="nowrap">{{ v.numeroFactura }}</td>
+      </ng-container>
+      <ng-container matColumnDef="fechaVenta">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha</th>
+        <td mat-cell *matCellDef="let v" class="nowrap">{{ v.fechaVenta | date: 'dd/MM/yyyy HH:mm' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="cliente">
+        <th mat-header-cell *matHeaderCellDef>Cliente</th>
+        <td mat-cell *matCellDef="let v">{{ v.nombreCliente }}</td>
+      </ng-container>
+      <ng-container matColumnDef="usuario">
+        <th mat-header-cell *matHeaderCellDef>Vendió</th>
+        <td mat-cell *matCellDef="let v" class="muted">{{ v.usuario }}</td>
+      </ng-container>
+      <ng-container matColumnDef="subtotal">
+        <th mat-header-cell *matHeaderCellDef class="num">Subtotal</th>
+        <td mat-cell *matCellDef="let v" class="num">{{ v.subtotal | moneda }}</td>
+      </ng-container>
+      <ng-container matColumnDef="iva">
+        <th mat-header-cell *matHeaderCellDef class="num">IVA</th>
+        <td mat-cell *matCellDef="let v" class="num">{{ v.iva | moneda }}</td>
+      </ng-container>
+      <ng-container matColumnDef="total">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header arrowPosition="before" class="num">Total</th>
+        <td mat-cell *matCellDef="let v" class="num"><strong>{{ v.total | moneda }}</strong></td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+      <tr mat-row *matRowDef="let v; columns: columnas" class="clicable" (click)="ver(v)" (keydown.enter)="ver(v)" tabindex="0"></tr>
+      <tr class="mat-row" *matNoDataRow><td class="vacio" [attr.colspan]="columnas.length">
+        {{ cargando() ? 'Cargando…' : 'No hay ventas con estos filtros' }}</td></tr>
+    </table>
+    <mat-paginator [length]="total()" [pageIndex]="pagina()" [pageSize]="tamano()" [pageSizeOptions]="[10, 20, 50]"
+                   (page)="cambiarPagina($event)" />
+  </div>
+</div>

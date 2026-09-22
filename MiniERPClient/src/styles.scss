@@ -1,0 +1,609 @@
+// =====================================================================
+//  Mini ERP - estilos globales
+//
+//  Tema: Angular Material 3 (Sass). Los estilos de pagina que se repiten
+//  (encabezados, filtros, tablas, tarjetas, graficas) viven aqui y no en
+//  cada componente, para que todas las pantallas se vean iguales y los
+//  componentes no excedan el presupuesto de estilos del build.
+// =====================================================================
+@use '@angular/material' as mat;
+
+html {
+  color-scheme: light;
+  @include mat.theme((color: (primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+        theme-type: light,
+      ),
+      typography: Roboto,
+      density: 0,
+    ));
+
+  // Tokens propios de la aplicacion
+  --erp-marca: #1f3864; // el mismo azul de la factura PDF
+  --erp-grafica: #3563a8; // serie unica de las graficas (validada contra #fff)
+  --erp-grafica-suave: #e7eef8;
+  --erp-texto: #1b1b1f;
+  --erp-texto-2: #44474e;
+  --erp-texto-3: #6b6f76;
+  --erp-borde: #dfe2e8;
+  --erp-fondo: #f5f7fa;
+  --erp-superficie: #ffffff;
+  --erp-ok: #1e7b45;
+  --erp-aviso: #9a6200;
+  --erp-critico: #b3261e;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+a:not([mat-button]):not([mat-flat-button]):not([mat-stroked-button]):not([mat-icon-button]):not([mat-list-item]):not(.tarjeta) {
+  color: var(--erp-marca);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--erp-fondo);
+  color: var(--erp-texto);
+}
+
+// ---------------------------------------------------------------------
+//  Estructura de pagina
+// ---------------------------------------------------------------------
+.pagina {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+@media (max-width: 600px) {
+  .pagina {
+    padding: 16px;
+  }
+}
+
+.encabezado {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+
+  h1 {
+    font: var(--mat-sys-headline-small);
+    margin: 0;
+  }
+
+  .subtitulo {
+    font: var(--mat-sys-body-medium);
+    color: var(--erp-texto-3);
+    margin: 2px 0 0;
+  }
+
+  .espacio {
+    flex: 1;
+  }
+}
+
+.tarjeta {
+  background: var(--erp-superficie);
+  border: 1px solid var(--erp-borde);
+  border-radius: 12px;
+  padding: 16px;
+  box-sizing: border-box;
+
+  h2 {
+    font: var(--mat-sys-title-medium);
+    margin: 0 0 12px;
+  }
+}
+
+.rejilla {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+.rejilla-2 {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+}
+
+@media (max-width: 700px) {
+  .rejilla-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Fila de filtros: siempre arriba de la tabla o grafica que filtran
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 12px;
+  align-items: center;
+
+  mat-form-field {
+    width: 200px;
+  }
+
+  .ancho {
+    width: 280px;
+  }
+
+  .angosto {
+    width: 120px;
+  }
+
+  .muy-ancho {
+    width: 460px;
+    max-width: 100%;
+  }
+}
+
+// Formularios en columnas
+.formulario {
+  display: grid;
+  gap: 14px 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  .completo {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 600px) {
+  .formulario {
+    grid-template-columns: 1fr;
+  }
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.filtros mat-form-field {
+  width: 200px;
+}
+
+.mat-mdc-dialog-content mat-form-field {
+  display: block;
+  margin-top: 10px;
+}
+
+.mat-mdc-dialog-content .formulario mat-form-field {
+  margin-top: 0;
+}
+
+// Mensaje de error general de un formulario (lo que no es de un campo)
+.mensaje-error {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fbeaea;
+  color: var(--erp-critico);
+  font: var(--mat-sys-body-medium);
+
+  mat-icon {
+    flex: none;
+  }
+}
+
+.boton-peligro {
+  --mat-button-filled-container-color: var(--erp-critico);
+}
+
+// ---------------------------------------------------------------------
+//  Tablas
+// ---------------------------------------------------------------------
+.tabla-contenedor {
+  background: var(--erp-superficie);
+  border: 1px solid var(--erp-borde);
+  border-radius: 12px;
+  overflow: auto;
+  position: relative;
+}
+
+table.mat-mdc-table {
+  width: 100%;
+  background: transparent;
+}
+
+.mat-mdc-header-cell {
+  font-weight: 500;
+  color: var(--erp-texto-2);
+  white-space: nowrap;
+}
+
+.mat-mdc-row.clicable {
+  cursor: pointer;
+}
+
+.mat-mdc-row.clicable:hover {
+  background: #f0f4fa;
+}
+
+.mat-mdc-row.inactivo td {
+  color: var(--erp-texto-3);
+}
+
+.num {
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.centro {
+  text-align: center !important;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.muted {
+  color: var(--erp-texto-3);
+}
+
+.vacio {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--erp-texto-3);
+}
+
+.cargando-barra {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+// Estados: siempre icono + texto, nunca solo color
+.estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font: var(--mat-sys-label-medium);
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+  border: 1px solid currentColor;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+
+  &.ok {
+    color: var(--erp-ok);
+    background: #e8f5ec;
+  }
+
+  &.aviso {
+    color: var(--erp-aviso);
+    background: #fdf3e1;
+  }
+
+  &.critico {
+    color: var(--erp-critico);
+    background: #fbeaea;
+  }
+
+  &.neutro {
+    color: var(--erp-texto-2);
+    background: #eef0f3;
+  }
+}
+
+// ---------------------------------------------------------------------
+//  Indicadores (tarjetas con una cifra)
+// ---------------------------------------------------------------------
+.indicador {
+  .etiqueta {
+    font: var(--mat-sys-label-large);
+    color: var(--erp-texto-2);
+  }
+
+  .valor {
+    font: var(--mat-sys-headline-medium);
+    font-weight: 500;
+    margin-top: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .detalle {
+    font: var(--mat-sys-body-small);
+    color: var(--erp-texto-3);
+    margin-top: 2px;
+  }
+}
+
+// Totales al pie de un documento (compra, venta)
+.totales {
+  display: grid;
+  grid-template-columns: auto 160px;
+  justify-content: end;
+  gap: 4px 24px;
+  margin-top: 12px;
+  font-variant-numeric: tabular-nums;
+
+  .v {
+    text-align: right;
+  }
+
+  .total {
+    font: var(--mat-sys-title-medium);
+    color: var(--erp-marca);
+  }
+}
+
+// ---------------------------------------------------------------------
+//  Graficas (una sola serie: un color, sin leyenda; el titulo la nombra)
+// ---------------------------------------------------------------------
+.grafica-barras {
+  display: grid;
+  grid-template-columns: minmax(120px, 34%) 1fr;
+  row-gap: 6px;
+  column-gap: 12px;
+  align-items: center;
+  font: var(--mat-sys-body-small);
+
+  .etiqueta {
+    color: var(--erp-texto-2);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: right;
+  }
+
+  .pista {
+    position: relative;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    border-left: 1px solid var(--erp-borde); // linea base
+  }
+
+  .barra {
+    height: 16px;
+    background: var(--erp-grafica);
+    border-radius: 0 4px 4px 0; // redondeada en la punta, recta en la base
+    min-width: 2px;
+  }
+
+  .valor {
+    margin-left: 6px;
+    color: var(--erp-texto);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .fila:hover .barra,
+  .pista:hover .barra {
+    filter: brightness(0.85);
+  }
+}
+
+.grafica-columnas {
+  position: relative;
+
+  .area {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 200px;
+    border-bottom: 1px solid var(--erp-borde);
+    padding-top: 20px;
+  }
+
+  .col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+    min-width: 6px;
+    position: relative;
+    cursor: default;
+  }
+
+  .col:hover {
+    background: var(--erp-grafica-suave);
+  }
+
+  .columna {
+    width: min(24px, 70%);
+    background: var(--erp-grafica);
+    border-radius: 4px 4px 0 0;
+  }
+
+  .cap {
+    font: var(--mat-sys-label-small);
+    color: var(--erp-texto);
+    white-space: nowrap;
+    margin-bottom: 2px;
+  }
+
+  .ejes {
+    display: flex;
+    gap: 2px;
+    margin-top: 4px;
+
+    span {
+      flex: 1;
+      min-width: 6px;
+      text-align: center;
+      font: var(--mat-sys-label-small);
+      color: var(--erp-texto-3);
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+  }
+}
+
+.info-emergente {
+  position: fixed;
+  z-index: 1000;
+  pointer-events: none;
+  background: #1b1b1f;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font: var(--mat-sys-body-small);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .2);
+  white-space: nowrap;
+
+  strong {
+    display: block;
+    font-weight: 500;
+  }
+}
+
+// ---------------------------------------------------------------------
+//  Impresion: solo el contenido del reporte
+// ---------------------------------------------------------------------
+@page {
+  size: letter landscape;
+  margin: 12mm;
+}
+
+@media print {
+
+  .no-imprimir,
+  mat-toolbar,
+  mat-sidenav,
+  .mat-drawer,
+  mat-paginator {
+    display: none !important;
+  }
+
+  .mat-drawer-container,
+  .mat-drawer-content,
+  .contenedor {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .tabla-contenedor {
+    overflow: visible !important;
+  }
+
+  table.mat-mdc-table {
+    font-size: 9pt;
+  }
+
+  .mat-mdc-cell,
+  .mat-mdc-header-cell {
+    padding: 3px 6px !important;
+  }
+
+  .mat-mdc-row,
+  .mat-mdc-header-row {
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  tr {
+    break-inside: avoid;
+  }
+
+  .mat-drawer-content {
+    margin-left: 0 !important;
+  }
+
+  body {
+    background: #fff;
+  }
+
+  .pagina {
+    padding: 0;
+    max-width: none;
+  }
+
+  .tarjeta {
+    border: none;
+    break-inside: avoid;
+  }
+
+  .tabla-contenedor {
+    border: none;
+  }
+
+  .mat-drawer-container,
+  .mat-drawer-content,
+  main {
+    background: #fff !important;
+  }
+
+  .solo-impresion {
+    display: block !important;
+  }
+}
+
+.solo-impresion {
+  display: none;
+}
+
+// ---------------------------------------------------------------------
+//  Inicio
+// ---------------------------------------------------------------------
+.accesos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.fila-lista {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--erp-borde);
+
+  >* {
+    flex: none;
+  }
+
+  >.crece {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+// Capas de costo del kardex, en el orden en que se consumen
+.capas {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+
+  .capa {
+    border: 1px solid var(--erp-borde);
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: grid;
+    gap: 2px;
+    font: var(--mat-sys-body-medium);
+
+    &.siguiente {
+      border-color: var(--erp-grafica);
+      background: var(--erp-grafica-suave);
+    }
+  }
+}

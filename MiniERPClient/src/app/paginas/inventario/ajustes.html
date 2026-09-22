@@ -1,0 +1,101 @@
+<div class="pagina">
+  <div class="encabezado">
+    <div>
+      <h1>Ajustes de inventario</h1>
+      <p class="subtitulo">Corrigen la existencia tras un conteo físico. Cada ajuste queda en el kardex con su motivo.</p>
+    </div>
+  </div>
+
+  <div class="rejilla-2">
+    <div class="tarjeta">
+      <h2>Nuevo ajuste</h2>
+      <app-buscador-producto etiqueta="Producto" (elegido)="elegir($event)" />
+
+      @if (producto(); as p) {
+        <div style="display:flex; gap:12px; align-items:center; margin: 4px 0 16px">
+          <span>Existencia actual: <strong>{{ p.stockActual }}</strong></span>
+          <app-existencia [stock]="p.stockActual" [minimo]="p.stockMinimo" />
+          <a routerLink="/inventario/kardex" [queryParams]="{ producto: p.idProducto }">Ver kardex</a>
+        </div>
+
+        <form [formGroup]="formulario" (ngSubmit)="aplicar()" novalidate>
+          <mat-button-toggle-group formControlName="tipo" aria-label="Tipo de ajuste" style="margin-bottom:16px">
+            <mat-button-toggle value="SALIDA"><mat-icon>remove</mat-icon> Salida (merma, daño)</mat-button-toggle>
+            <mat-button-toggle value="ENTRADA"><mat-icon>add</mat-icon> Entrada (sobrante)</mat-button-toggle>
+          </mat-button-toggle-group>
+
+          <div class="formulario">
+            <mat-form-field>
+              <mat-label>Cantidad</mat-label>
+              <input matInput type="number" formControlName="cantidad" min="1" step="1">
+              <mat-error>{{ errorCantidad() }}</mat-error>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>Costo unitario</mat-label>
+              <span matTextPrefix>Q&nbsp;</span>
+              <input matInput type="number" formControlName="costoUnitario" min="0.01" step="0.01"
+                     [placeholder]="ultimoCosto() !== null ? (ultimoCosto()! | moneda: 4) : ''">
+              @if (tipo() === 'SALIDA') {
+                <mat-hint>En una salida el costo lo determina UEPS</mat-hint>
+              } @else {
+                <mat-hint>Opcional: si lo deja vacío se usa el de la última entrada{{ ultimoCosto() !== null ? ' (' + (ultimoCosto()! | moneda: 4) + ')' : '' }}</mat-hint>
+              }
+              <mat-error>{{ mensajeCampo(formulario.controls.costoUnitario) }}</mat-error>
+            </mat-form-field>
+            <mat-form-field class="completo">
+              <mat-label>Motivo</mat-label>
+              <textarea matInput formControlName="motivo" rows="2" maxlength="300"
+                        placeholder="Ej.: Merma por daño en bodega durante inventario de septiembre"></textarea>
+              <mat-hint align="end">{{ formulario.controls.motivo.value?.length ?? 0 }}/300</mat-hint>
+              <mat-error>{{ mensajeCampo(formulario.controls.motivo) }}</mat-error>
+            </mat-form-field>
+          </div>
+
+          @if (mensaje()) { <p class="mensaje-error" role="alert"><mat-icon>error</mat-icon>{{ mensaje() }}</p> }
+
+          <div style="display:flex; justify-content:flex-end; margin-top:16px">
+            <button mat-flat-button type="submit" [disabled]="guardando()"><mat-icon>check</mat-icon>Aplicar ajuste</button>
+          </div>
+          @if (guardando()) { <mat-progress-bar mode="indeterminate" style="margin-top:8px" /> }
+        </form>
+      } @else {
+        <p class="vacio">Busque el producto que desea ajustar.</p>
+      }
+    </div>
+
+    <div class="tarjeta">
+      @if (resultado(); as m) {
+        <h2><mat-icon style="vertical-align:middle; color:var(--erp-ok)">check_circle</mat-icon> Ajuste aplicado</h2>
+        <div class="totales" style="justify-content:start; grid-template-columns: auto auto">
+          <span class="muted">Producto</span><span>{{ m.codigoProducto }} · {{ m.nombreProducto }}</span>
+          <span class="muted">Tipo</span><span>{{ m.tipoMovimiento === 'ENTRADA' ? 'Entrada' : 'Salida' }} de {{ m.cantidad }}</span>
+          <span class="muted">Existencia</span><span>{{ m.existenciaAnterior }} → <strong>{{ m.existenciaNueva }}</strong></span>
+          <span class="muted">Costo unitario</span><span>{{ m.costoUnitario | moneda: 4 }}</span>
+          <span class="muted">Valor</span><span>{{ m.valorMovimiento | moneda }}</span>
+          <span class="muted">Motivo</span><span>{{ m.observaciones }}</span>
+        </div>
+      } @else if (valuacion(); as v) {
+        <h2>Capas de costo vigentes ({{ v.metodo }})</h2>
+        <p class="muted" style="margin-top:-6px">Una salida consume primero la capa de arriba.</p>
+        @for (c of v.capas; track c.idCapa) {
+          @if (c.cantidadDisponible > 0) {
+            <div style="display:flex; justify-content:space-between; padding:6px 0; border-top:1px solid var(--erp-borde)">
+              <span>{{ c.cantidadDisponible }} u. · {{ c.origen }}</span>
+              <span class="num">{{ c.costoUnitario | moneda: 4 }}</span>
+            </div>
+          }
+        } @empty {
+          <p class="vacio">Sin unidades en existencia</p>
+        }
+      } @else {
+        <h2>Cómo funcionan los ajustes</h2>
+        <ul class="muted" style="padding-left:18px; margin:0; line-height:1.6">
+          <li>Solo el área de Inventario puede aplicarlos.</li>
+          <li>El motivo es obligatorio (al menos 5 caracteres) y queda en el kardex.</li>
+          <li>Una salida nunca deja la existencia en negativo.</li>
+          <li>Un producto inactivo no admite ajustes de entrada.</li>
+        </ul>
+      }
+    </div>
+  </div>
+</div>

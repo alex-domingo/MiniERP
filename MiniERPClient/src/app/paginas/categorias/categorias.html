@@ -1,0 +1,63 @@
+<div class="pagina">
+  <div class="encabezado">
+    <div>
+      <h1>Categorías</h1>
+      <p class="subtitulo">Clasificación de los productos del catálogo</p>
+    </div>
+    <span class="espacio"></span>
+    @if (puedeEditar) {
+      <button mat-flat-button (click)="abrir()"><mat-icon>add</mat-icon>Nueva categoría</button>
+    }
+  </div>
+
+  <div class="filtros">
+    <mat-form-field class="ancho">
+      <mat-label>Buscar</mat-label>
+      <input matInput [formControl]="busqueda" placeholder="Nombre">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+    <mat-button-toggle-group [value]="estado()" (change)="cambiarEstado($event.value)" aria-label="Estado">
+      <mat-button-toggle value="activos">Activas</mat-button-toggle>
+      <mat-button-toggle value="inactivos">Inactivas</mat-button-toggle>
+      <mat-button-toggle value="todos">Todas</mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+
+  <div class="tabla-contenedor">
+    @if (cargando()) { <mat-progress-bar mode="indeterminate" class="cargando-barra" /> }
+    <table mat-table [dataSource]="filas()" matSort (matSortChange)="ordenar($event)">
+      <ng-container matColumnDef="nombre">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Nombre</th>
+        <td mat-cell *matCellDef="let c">{{ c.nombre }}</td>
+      </ng-container>
+      <ng-container matColumnDef="descripcion">
+        <th mat-header-cell *matHeaderCellDef>Descripción</th>
+        <td mat-cell *matCellDef="let c" class="muted">{{ c.descripcion }}</td>
+      </ng-container>
+      <ng-container matColumnDef="estado">
+        <th mat-header-cell *matHeaderCellDef>Estado</th>
+        <td mat-cell *matCellDef="let c">
+          <span class="estado" [class.ok]="c.activo" [class.neutro]="!c.activo">{{ c.activo ? 'Activa' : 'Inactiva' }}</span>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let c" class="num">
+          <button mat-icon-button (click)="abrir(c)" matTooltip="Editar" [attr.aria-label]="'Editar ' + c.nombre">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button (click)="cambiarActivo(c)" [matTooltip]="c.activo ? 'Desactivar' : 'Activar'"
+                  [attr.aria-label]="(c.activo ? 'Desactivar ' : 'Activar ') + c.nombre">
+            <mat-icon>{{ c.activo ? 'toggle_on' : 'toggle_off' }}</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+      <tr mat-row *matRowDef="let c; columns: columnas" [class.inactivo]="!c.activo"></tr>
+      <tr class="mat-row" *matNoDataRow><td class="vacio" [attr.colspan]="columnas.length">
+        {{ cargando() ? 'Cargando…' : 'No hay categorías que coincidan' }}</td></tr>
+    </table>
+    <mat-paginator [length]="total()" [pageIndex]="pagina()" [pageSize]="tamano()" [pageSizeOptions]="[10, 20, 50]"
+                   (page)="cambiarPagina($event)" />
+  </div>
+</div>

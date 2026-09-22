@@ -1,0 +1,49 @@
+.contenedor { height: 100vh; }
+.lateral {
+  width: 248px;
+  border-right: 1px solid var(--erp-borde);
+  background: var(--erp-superficie);
+}
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 16px 10px;
+  color: var(--erp-marca);
+  mat-icon { font-size: 30px; width: 30px; height: 30px; }
+  .nombre { font: var(--mat-sys-title-large); font-weight: 500; }
+  .lema { font: var(--mat-sys-body-small); color: var(--erp-texto-3); }
+}
+.grupo {
+  font: var(--mat-sys-label-medium);
+  color: var(--erp-texto-3);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 14px 16px 4px;
+}
+a.activo {
+  background: var(--mat-sys-secondary-container);
+  --mat-list-list-item-label-text-color: var(--erp-marca);
+}
+.barra {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: var(--erp-superficie);
+  border-bottom: 1px solid var(--erp-borde);
+}
+.espacio { flex: 1; }
+.usuario .area {
+  margin-left: 8px;
+  font: var(--mat-sys-label-small);
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--mat-sys-secondary-container);
+}
+.info-usuario {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 16px 12px;
+  gap: 2px;
+}
+@media (max-width: 600px) { .texto-usuario { display: none; } }

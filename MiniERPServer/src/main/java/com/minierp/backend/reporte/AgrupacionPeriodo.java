@@ -13,23 +13,30 @@ import java.time.temporal.IsoFields;
  */
 public enum AgrupacionPeriodo {
 
-    DIA("day", "1 day", ChronoUnit.DAYS),
-    SEMANA("week", "1 week", ChronoUnit.WEEKS),
-    MES("month", "1 month", ChronoUnit.MONTHS),
-    TRIMESTRE("quarter", "3 months", ChronoUnit.MONTHS),
-    ANIO("year", "1 year", ChronoUnit.YEARS);
+    DIA("día", "day", "1 day", ChronoUnit.DAYS),
+    SEMANA("semana", "week", "1 week", ChronoUnit.WEEKS),
+    MES("mes", "month", "1 month", ChronoUnit.MONTHS),
+    TRIMESTRE("trimestre", "quarter", "3 months", ChronoUnit.MONTHS),
+    ANIO("año", "year", "1 year", ChronoUnit.YEARS);
 
     private static final String[] MESES = {"Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio",
             "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"};
 
+    private final String nombre;
     private final String unidadSql;
     private final String intervaloSql;
     private final ChronoUnit unidad;
 
-    AgrupacionPeriodo(String unidadSql, String intervaloSql, ChronoUnit unidad) {
+    AgrupacionPeriodo(String nombre, String unidadSql, String intervaloSql, ChronoUnit unidad) {
+        this.nombre = nombre;
         this.unidadSql = unidadSql;
         this.intervaloSql = intervaloSql;
         this.unidad = unidad;
+    }
+
+    /** Nombre en espanol para titulos ("Resumen de ventas por año"). */
+    String nombre() {
+        return nombre;
     }
 
     String unidadSql() {

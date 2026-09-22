@@ -1,0 +1,119 @@
+<div class="pagina">
+  <div class="encabezado">
+    <div>
+      <h1>Kardex</h1>
+      <p class="subtitulo">Historial de entradas y salidas de un producto, con su origen y su costo</p>
+    </div>
+    <span class="espacio"></span>
+    @if (puedeAjustar && producto(); as p) {
+      <a mat-stroked-button routerLink="/inventario/ajustes" [queryParams]="{ producto: p.idProducto }">
+        <mat-icon>tune</mat-icon>Ajustar este producto
+      </a>
+    }
+  </div>
+
+  <div class="filtros">
+    <app-buscador-producto etiqueta="Producto" clase="muy-ancho" [soloActivos]="false" (elegido)="elegir($event)" />
+    <app-rango-fechas (cambio)="filtrar($event)" />
+  </div>
+
+  @if (producto(); as p) {
+    <div class="rejilla" style="margin-bottom:16px">
+      <div class="tarjeta indicador">
+        <div class="etiqueta">Existencia actual</div>
+        <div class="valor">{{ p.stockActual }}</div>
+        <div class="detalle"><app-existencia [stock]="p.stockActual" [minimo]="p.stockMinimo" /></div>
+      </div>
+      @if (valuacion(); as v) {
+        <div class="tarjeta indicador">
+          <div class="etiqueta">Valor del inventario ({{ v.metodo }})</div>
+          <div class="valor">{{ v.valorTotal | moneda }}</div>
+          <div class="detalle">{{ v.unidadesEnCapas }} unidades en {{ capasVigentes().length }} capas de costo</div>
+        </div>
+        <div class="tarjeta indicador">
+          <div class="etiqueta">Costo promedio vigente</div>
+          <div class="valor">{{ v.costoPromedio | moneda: 4 }}</div>
+          <div class="detalle">Ponderado por las unidades disponibles</div>
+        </div>
+      }
+    </div>
+
+    <div style="display:grid; gap:16px">
+      <div class="tabla-contenedor">
+        @if (cargando()) { <mat-progress-bar mode="indeterminate" class="cargando-barra" /> }
+        <table mat-table [dataSource]="movimientos()">
+          <ng-container matColumnDef="fecha">
+            <th mat-header-cell *matHeaderCellDef>Fecha</th>
+            <td mat-cell *matCellDef="let m" class="nowrap">{{ m.fechaMovimiento | date: 'dd/MM/yyyy HH:mm' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="origen">
+            <th mat-header-cell *matHeaderCellDef>Origen</th>
+            <td mat-cell *matCellDef="let m" [matTooltip]="m.observaciones">
+              <span class="estado" [class.ok]="m.tipoMovimiento === 'ENTRADA'" [class.neutro]="m.tipoMovimiento === 'SALIDA'">
+                <mat-icon>{{ m.tipoMovimiento === 'ENTRADA' ? 'south_east' : 'north_east' }}</mat-icon>{{ etiqueta(m.origen) }}
+              </span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="documento">
+            <th mat-header-cell *matHeaderCellDef>Documento</th>
+            <td mat-cell *matCellDef="let m" class="nowrap">{{ m.documento }}</td>
+          </ng-container>
+          <ng-container matColumnDef="tercero">
+            <th mat-header-cell *matHeaderCellDef>Proveedor / cliente / motivo</th>
+            <td mat-cell *matCellDef="let m" class="muted">{{ m.tercero ?? m.observaciones }}</td>
+          </ng-container>
+          <ng-container matColumnDef="entrada">
+            <th mat-header-cell *matHeaderCellDef class="num">Entrada</th>
+            <td mat-cell *matCellDef="let m" class="num">{{ m.tipoMovimiento === 'ENTRADA' ? m.cantidad : '' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="salida">
+            <th mat-header-cell *matHeaderCellDef class="num">Salida</th>
+            <td mat-cell *matCellDef="let m" class="num">{{ m.tipoMovimiento === 'SALIDA' ? m.cantidad : '' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="costo">
+            <th mat-header-cell *matHeaderCellDef class="num">Costo unitario</th>
+            <td mat-cell *matCellDef="let m" class="num">{{ m.costoUnitario | moneda: 4 }}</td>
+          </ng-container>
+          <ng-container matColumnDef="saldo">
+            <th mat-header-cell *matHeaderCellDef class="num">Saldo</th>
+            <td mat-cell *matCellDef="let m" class="num"><strong>{{ m.existenciaNueva }}</strong></td>
+          </ng-container>
+          <ng-container matColumnDef="usuario">
+            <th mat-header-cell *matHeaderCellDef>Usuario</th>
+            <td mat-cell *matCellDef="let m" class="muted">{{ m.usuario }}</td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+          <tr mat-row *matRowDef="let m; columns: columnas"></tr>
+          <tr class="mat-row" *matNoDataRow><td class="vacio" [attr.colspan]="columnas.length">
+            {{ cargando() ? 'Cargando…' : 'Sin movimientos en el periodo' }}</td></tr>
+        </table>
+        <mat-paginator [length]="total()" [pageIndex]="pagina()" [pageSize]="tamano()" [pageSizeOptions]="[20, 50, 100]"
+                       (page)="cambiarPagina($event)" />
+      </div>
+
+      @if (valuacion(); as v) {
+        <div class="tarjeta">
+          <h2>Capas de costo ({{ v.metodo }})</h2>
+          <p class="muted" style="margin-top:-6px">
+            {{ v.metodo === 'UEPS' ? 'La próxima salida toma primero la capa de arriba (la entrada más reciente).'
+                                    : 'La próxima salida toma primero la capa de arriba (la entrada más antigua).' }}
+          </p>
+          <div class="capas">
+            @for (c of capasVigentes(); track c.idCapa; let primera = $first; let n = $index) {
+              <div class="capa" [class.siguiente]="primera">
+                <div class="muted">{{ n + 1 }}.º en salir @if (primera) { <span class="estado neutro">Siguiente</span> }</div>
+                <div><strong>{{ c.cantidadDisponible }}</strong> de {{ c.cantidadInicial }} u. a {{ c.costoUnitario | moneda: 4 }}</div>
+                <div class="muted">{{ c.fechaEntrada | date: 'dd/MM/yyyy' }} · {{ c.origen }}</div>
+                <div>{{ c.valorDisponible | moneda }}</div>
+              </div>
+            } @empty {
+              <p class="vacio">Sin unidades en existencia</p>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="tarjeta vacio">Elija un producto para ver su kardex.</div>
+  }
+</div>

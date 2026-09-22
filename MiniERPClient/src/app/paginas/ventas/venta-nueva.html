@@ -1,0 +1,88 @@
+<div class="pagina">
+  <div class="encabezado">
+    <button mat-icon-button routerLink="/ventas" aria-label="Volver a ventas"><mat-icon>arrow_back</mat-icon></button>
+    <div>
+      <h1>Nueva venta</h1>
+      <p class="subtitulo">El número de factura, la fecha y los precios los fija el sistema al registrar</p>
+    </div>
+  </div>
+
+  <div class="tarjeta" style="margin-bottom:16px">
+    <mat-form-field style="max-width:560px">
+      <mat-label>Cliente</mat-label>
+      <input matInput [formControl]="cliente" [matAutocomplete]="autoCliente" placeholder="Nombre o NIT">
+      <mat-icon matSuffix>person_search</mat-icon>
+      <mat-autocomplete #autoCliente="matAutocomplete" [displayWith]="mostrarCliente">
+        @for (c of clientesFiltrados(); track c.idCliente) {
+          <mat-option [value]="c">{{ c.nombre }} <span class="muted">· NIT {{ c.nit }}</span></mat-option>
+        } @empty {
+          <mat-option disabled>Sin coincidencias</mat-option>
+        }
+      </mat-autocomplete>
+      <mat-error>Elija un cliente de la lista</mat-error>
+    </mat-form-field>
+  </div>
+
+  <div class="tarjeta">
+    <h2>Productos</h2>
+    <div class="filtros">
+      <app-buscador-producto etiqueta="Agregar producto" clase="muy-ancho" [deshabilitar]="noVendible"
+                             [limpiarAlElegir]="true" (elegido)="agregar($event)" />
+      <span class="muted">Los productos sin existencia aparecen deshabilitados</span>
+    </div>
+
+    @if (lineas.length) {
+      <div class="tabla-contenedor" style="border:none">
+        <table class="mat-mdc-table mdc-data-table__table" style="width:100%">
+          <thead>
+            <tr class="mat-mdc-header-row">
+              <th class="mat-mdc-header-cell">Producto</th>
+              <th class="mat-mdc-header-cell num">Existencia</th>
+              <th class="mat-mdc-header-cell num" style="width:130px">Cantidad</th>
+              <th class="mat-mdc-header-cell num">Precio</th>
+              <th class="mat-mdc-header-cell num">Importe</th>
+              <th class="mat-mdc-header-cell" style="width:48px"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (l of lineas.controls; track l; let i = $index) {
+              <tr class="mat-mdc-row" [formGroup]="l">
+                <td class="mat-mdc-cell"><strong>{{ l.controls.producto.value.codigo }}</strong> · {{ l.controls.producto.value.nombre }}</td>
+                <td class="mat-mdc-cell num muted">{{ l.controls.producto.value.stockActual }}</td>
+                <td class="mat-mdc-cell">
+                  <mat-form-field style="margin:6px 0">
+                    <input matInput type="number" formControlName="cantidad" min="1" [max]="l.controls.producto.value.stockActual"
+                           step="1" aria-label="Cantidad" class="num">
+                    <mat-error>{{ errorCantidad(l) }}</mat-error>
+                  </mat-form-field>
+                </td>
+                <td class="mat-mdc-cell num">{{ l.controls.producto.value.precioVenta | moneda }}</td>
+                <td class="mat-mdc-cell num">{{ importe(l) | moneda }}</td>
+                <td class="mat-mdc-cell">
+                  <button mat-icon-button (click)="quitar(i)" matTooltip="Quitar línea" aria-label="Quitar línea"><mat-icon>delete</mat-icon></button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="totales">
+        <span>Subtotal</span><span class="v">{{ subtotal() | moneda }}</span>
+        <span>IVA ({{ iva() * 100 | number: '1.0-2' }} %)</span><span class="v">{{ montoIva() | moneda }}</span>
+        <span class="total">Total</span><span class="v total">{{ total() | moneda }}</span>
+      </div>
+    } @else {
+      <p class="vacio">Busque y agregue los productos que lleva el cliente.</p>
+    }
+
+    @if (mensaje()) { <p class="mensaje-error" role="alert"><mat-icon>error</mat-icon>{{ mensaje() }}</p> }
+
+    <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px">
+      <a mat-button routerLink="/ventas">Cancelar</a>
+      <button mat-flat-button (click)="registrar()" [disabled]="guardando() || !lineas.length">
+        <mat-icon>receipt</mat-icon>Registrar y facturar
+      </button>
+    </div>
+    @if (guardando()) { <mat-progress-bar mode="indeterminate" style="margin-top:8px" /> }
+  </div>
+</div>

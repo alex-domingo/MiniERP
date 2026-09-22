@@ -228,7 +228,7 @@ public class ServicioReportesVentas {
 
         var f = filtros("agrupacion", a);
         rango.agregarA(f);
-        String titulo = "Resumen de ventas por " + a.name().toLowerCase();
+        String titulo = "Resumen de ventas por " + a.nombre();
         return respuesta(titulo, f, resumen, filas, null);
     }
 

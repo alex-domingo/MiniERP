@@ -1,0 +1,97 @@
+<div class="pagina">
+  <div class="encabezado">
+    <div>
+      <h1>{{ saludo }}, {{ nombre }}</h1>
+      <p class="subtitulo">Área de {{ area }} · {{ hoy | date: "EEEE d 'de' MMMM 'de' y" }}
+        @if (salud(); as s) { · Valuación {{ s.metodoValuacion }} · IVA {{ s.iva * 100 | number: '1.0-2' }} % }</p>
+    </div>
+  </div>
+
+  <div class="accesos no-imprimir">
+    @for (a of accesos(); track a.ruta) {
+      <a mat-stroked-button [routerLink]="a.ruta"><mat-icon>{{ a.icono }}</mat-icon>{{ a.texto }}</a>
+    }
+  </div>
+
+  <div class="rejilla-2" style="margin-top:16px">
+    <div class="tarjeta">
+      <h2>Existencias que requieren atención</h2>
+      @if (alertas(); as lista) {
+        @if (lista.length === 0) {
+          <p><span class="estado ok"><mat-icon>check_circle</mat-icon>Todo en orden</span> Ningún producto está en su mínimo.</p>
+        } @else {
+          <p class="muted" style="margin-top:-6px">{{ lista.length }} productos en su stock mínimo o por debajo</p>
+          @for (p of lista.slice(0, 6); track p.idProducto) {
+            <div class="fila-lista">
+              <a class="crece" [routerLink]="['/productos', p.idProducto]"><strong>{{ p.codigo }}</strong> · {{ p.nombre }}</a>
+              <span class="nowrap">{{ p.stockActual }}/{{ p.stockMinimo }} <app-existencia [stock]="p.stockActual" [minimo]="p.stockMinimo" /></span>
+            </div>
+          }
+          @if (sesion.puede('verInventario')) {
+            <a mat-button routerLink="/inventario/existencias" style="margin-top:8px">Ver todas<mat-icon iconPositionEnd>chevron_right</mat-icon></a>
+          }
+        }
+      } @else {
+        <mat-progress-bar mode="indeterminate" />
+      }
+    </div>
+
+    @if (verVentas) {
+      <div class="tarjeta">
+        <h2>Ventas de este mes</h2>
+        @if (ventas(); as v) {
+          <div class="indicador"><div class="valor">{{ v.totalElementos }}</div><div class="detalle">ventas desde el 1 de {{ hoy | date: 'MMMM' }}</div></div>
+          @for (x of ultimas(v); track x.idVenta) {
+            <div class="fila-lista">
+              <a [routerLink]="['/ventas', x.idVenta]">{{ x.numeroFactura }}</a>
+              <span class="muted crece">{{ x.nombreCliente }}</span>
+              <span class="num">{{ x.total | moneda }}</span>
+            </div>
+          } @empty {
+            <p class="muted">Todavía no hay ventas este mes.</p>
+          }
+        } @else {
+          <mat-progress-bar mode="indeterminate" />
+        }
+      </div>
+    }
+
+    @if (verCompras) {
+      <div class="tarjeta">
+        <h2>Compras de este mes</h2>
+        @if (compras(); as c) {
+          <div class="indicador"><div class="valor">{{ c.totalElementos }}</div><div class="detalle">compras desde el 1 de {{ hoy | date: 'MMMM' }}</div></div>
+          @for (x of ultimas(c); track x.idCompra) {
+            <div class="fila-lista">
+              <a [routerLink]="['/compras', x.idCompra]">{{ x.numeroDocumento }}</a>
+              <span class="muted crece">{{ x.nombreProveedor }}</span>
+              <span class="num">{{ x.total | moneda }}</span>
+            </div>
+          } @empty {
+            <p class="muted">Todavía no hay compras este mes.</p>
+          }
+        } @else {
+          <mat-progress-bar mode="indeterminate" />
+        }
+      </div>
+    }
+
+    @if (verIntegridad) {
+      <div class="tarjeta">
+        <h2>Integridad del inventario</h2>
+        @if (integridad(); as r) {
+          <p>
+            <span class="estado" [class.ok]="r.consistente" [class.critico]="!r.consistente">
+              <mat-icon>{{ r.consistente ? 'verified' : 'report' }}</mat-icon>
+              {{ r.consistente ? 'Las 10 comprobaciones están en cero' : 'Hay comprobaciones con error' }}
+            </span>
+          </p>
+          <p class="muted">Existencias, kardex, capas de costo y totales de documentos cuadran entre sí.</p>
+          <a mat-button routerLink="/inventario/verificacion">Ver detalle<mat-icon iconPositionEnd>chevron_right</mat-icon></a>
+        } @else {
+          <mat-progress-bar mode="indeterminate" />
+        }
+      </div>
+    }
+  </div>
+</div>

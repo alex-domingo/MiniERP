@@ -1,0 +1,51 @@
+<div class="fondo">
+  <form class="tarjeta panel" [formGroup]="formulario" (ngSubmit)="entrar()" novalidate>
+    @if (enviando()) {
+      <mat-progress-bar mode="indeterminate" class="progreso" />
+    }
+    <div class="marca">
+      <mat-icon>storefront</mat-icon>
+      <div>
+        <h1>Mini ERP</h1>
+        <p>Gestión comercial · Muebles para hogar y oficina</p>
+      </div>
+    </div>
+
+    @if (expirada) {
+      <p class="aviso" role="status"><mat-icon>schedule</mat-icon>Su sesión expiró. Inicie sesión de nuevo.</p>
+    }
+
+    <mat-form-field appearance="outline">
+      <mat-label>Usuario</mat-label>
+      <input matInput formControlName="usuario" autocomplete="username" autofocus>
+      <mat-icon matPrefix>person</mat-icon>
+      @if (formulario.controls.usuario.hasError('required')) {
+        <mat-error>Ingrese su usuario</mat-error>
+      } @else if (formulario.controls.usuario.hasError('minlength')) {
+        <mat-error>El usuario tiene al menos 4 caracteres</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Contraseña</mat-label>
+      <input matInput [type]="ocultar() ? 'password' : 'text'" formControlName="contrasena"
+             autocomplete="current-password">
+      <mat-icon matPrefix>lock</mat-icon>
+      <button mat-icon-button matSuffix type="button" (click)="ocultar.set(!ocultar())"
+              [attr.aria-label]="ocultar() ? 'Mostrar contraseña' : 'Ocultar contraseña'">
+        <mat-icon>{{ ocultar() ? 'visibility' : 'visibility_off' }}</mat-icon>
+      </button>
+      @if (formulario.controls.contrasena.hasError('required')) {
+        <mat-error>Ingrese su contraseña</mat-error>
+      } @else if (formulario.controls.contrasena.hasError('minlength')) {
+        <mat-error>La contraseña tiene al menos 6 caracteres</mat-error>
+      }
+    </mat-form-field>
+
+    @if (error()) {
+      <p class="error" role="alert"><mat-icon>error</mat-icon>{{ error() }}</p>
+    }
+
+    <button mat-flat-button type="submit" class="entrar" [disabled]="enviando()">Iniciar sesión</button>
+  </form>
+</div>

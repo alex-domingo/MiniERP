@@ -1,0 +1,104 @@
+<div class="pagina">
+  <div class="encabezado">
+    <button mat-icon-button routerLink="/compras" aria-label="Volver a compras"><mat-icon>arrow_back</mat-icon></button>
+    <div>
+      <h1>Nueva compra</h1>
+      <p class="subtitulo">El número de documento y la fecha los asigna el sistema al registrar</p>
+    </div>
+  </div>
+
+  <div class="tarjeta" style="margin-bottom:16px">
+    <div class="formulario">
+      <mat-form-field>
+        <mat-label>Proveedor</mat-label>
+        <mat-select [formControl]="proveedor" (selectionChange)="cambiarProveedor($event.value)">
+          @for (p of proveedores(); track p.idProveedor) {
+            <mat-option [value]="p.idProveedor">{{ p.nombre }} <span class="muted">· {{ p.nit }}</span></mat-option>
+          }
+        </mat-select>
+        <mat-error>Elija el proveedor</mat-error>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Observaciones</mat-label>
+        <input matInput [formControl]="observaciones" maxlength="300" placeholder="Factura del proveedor, condiciones…">
+      </mat-form-field>
+    </div>
+  </div>
+
+  <div class="tarjeta">
+    <h2>Productos</h2>
+    @if (proveedor.value) {
+      <div class="filtros">
+        <mat-form-field class="ancho" style="width:420px">
+          <mat-label>Agregar producto de este proveedor</mat-label>
+          <mat-select [formControl]="aAgregar" (selectionChange)="agregar($event.value)">
+            @for (p of productos(); track p.idProducto) {
+              <mat-option [value]="p" [disabled]="agregado(p)">
+                {{ p.codigoProducto }} · {{ p.nombreProducto }} <span class="muted">— ref. {{ p.costoReferencia | moneda }}</span>
+              </mat-option>
+            } @empty {
+              <mat-option disabled>Este proveedor no tiene productos asociados</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+    } @else {
+      <p class="muted">Elija primero el proveedor: solo se pueden comprar los productos que suministra.</p>
+    }
+
+    @if (lineas.length) {
+      <div class="tabla-contenedor" style="border:none">
+        <table class="mat-mdc-table mdc-data-table__table" style="width:100%">
+          <thead>
+            <tr class="mat-mdc-header-row">
+              <th class="mat-mdc-header-cell">Producto</th>
+              <th class="mat-mdc-header-cell num" style="width:120px">Cantidad</th>
+              <th class="mat-mdc-header-cell num" style="width:160px">Costo unitario</th>
+              <th class="mat-mdc-header-cell num" style="width:140px">Subtotal</th>
+              <th class="mat-mdc-header-cell" style="width:48px"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (l of lineas.controls; track l; let i = $index) {
+              <tr class="mat-mdc-row" [formGroup]="l">
+                <td class="mat-mdc-cell">
+                  <strong>{{ l.controls.producto.value.codigoProducto }}</strong> · {{ l.controls.producto.value.nombreProducto }}
+                </td>
+                <td class="mat-mdc-cell">
+                  <mat-form-field style="margin:6px 0">
+                    <input matInput type="number" formControlName="cantidad" min="1" step="1" aria-label="Cantidad" class="num">
+                    <mat-error>{{ mensajeCampo(l.controls.cantidad) }}</mat-error>
+                  </mat-form-field>
+                </td>
+                <td class="mat-mdc-cell">
+                  <mat-form-field style="margin:6px 0">
+                    <span matTextPrefix>Q&nbsp;</span>
+                    <input matInput type="number" formControlName="costoUnitario" min="0.01" step="0.01" aria-label="Costo unitario" class="num">
+                    <mat-error>{{ mensajeCampo(l.controls.costoUnitario) }}</mat-error>
+                  </mat-form-field>
+                </td>
+                <td class="mat-mdc-cell num">{{ subtotal(l) | moneda }}</td>
+                <td class="mat-mdc-cell">
+                  <button mat-icon-button (click)="quitar(i)" matTooltip="Quitar línea" aria-label="Quitar línea"><mat-icon>delete</mat-icon></button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="totales">
+        <span class="total">Total</span><span class="v total">{{ total() | moneda }}</span>
+      </div>
+    }
+
+    @if (mensaje()) { <p class="mensaje-error" role="alert"><mat-icon>error</mat-icon>{{ mensaje() }}</p> }
+
+    <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px">
+      <a mat-button routerLink="/compras">Cancelar</a>
+      <button mat-flat-button (click)="registrar()" [disabled]="guardando() || !lineas.length">
+        <mat-icon>check</mat-icon>Registrar compra
+      </button>
+    </div>
+    @if (guardando()) { <mat-progress-bar mode="indeterminate" style="margin-top:8px" /> }
+  </div>
+</div>

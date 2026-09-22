@@ -1,59 +1,72 @@
-# MiniERPClient
+# Mini ERP · Cliente Angular
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.4.
+Aplicación cliente del sistema de gestión comercial Mini ERP. Consume la API REST
+del servidor Spring Boot (`MiniERPServer`); nunca se conecta a la base de datos.
 
-## Development server
+- Angular 21 (componentes standalone, signals, sin zone.js) y Angular Material 21
+- Idioma y formatos de Guatemala: `es-GT`, fechas `dd/mm/aaaa`, moneda `Q 1,234.50`
+- Cada página se carga bajo demanda (lazy loading)
 
-To start a local development server, run:
+## Requisitos
 
-```bash
-ng serve
-```
+- Node.js 20.19+, 22.12+ o 24+ (lo que exige Angular 21) y npm
+- El servidor corriendo en `http://localhost:8080` (`mvn spring-boot:run` en `MiniERPServer`)
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Ejecutar en desarrollo
 
 ```bash
-ng generate component component-name
+npm install
+npm start          # equivale a: ng serve
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Abrir `http://localhost:4200`. Durante el desarrollo, `proxy.conf.json` redirige
+las llamadas a `/api` hacia `http://localhost:8080`, de modo que el navegador
+nunca hace peticiones de otro origen.
+
+Usuarios de la carga inicial (uno por área):
+
+| Usuario       | Contraseña      | Área           |
+|---------------|-----------------|----------------|
+| `admin`       | `admin123`      | Administración |
+| `jcompras`    | `compras123`    | Compras        |
+| `minventario` | `inventario123` | Inventario     |
+| `cventas`     | `ventas123`     | Ventas         |
+
+## Pruebas y compilación
 
 ```bash
-ng generate --help
+npm test -- --watch=false   # pruebas unitarias (Vitest)
+npm run build               # compilación de producción en dist/MiniERPClient
 ```
 
-## Building
+Para publicar el build de producción en otro servidor, la API debe quedar
+disponible en la ruta `/api` del mismo origen (proxy inverso), o bien el
+servidor debe incluir ese origen en `minierp.cors.origenes`.
 
-To build the project run:
+## Estructura
 
-```bash
-ng build
+```
+src/app/
+  nucleo/        modelos de la API, servicios HTTP, sesión JWT, interceptores,
+                 guardias de ruta y matriz de permisos por área
+  compartido/    piezas reutilizables: listados paginados, buscador de productos,
+                 rango de fechas, gráficas, formatos, diálogos
+  diseno/        marco de la aplicación y menú según el área del usuario
+  paginas/       una carpeta por módulo: catálogos, compras, ventas,
+                 inventario y reportes
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+### Seguridad en el cliente
 
-## Running unit tests
+- El token JWT se guarda en `localStorage` y la sesión se cierra sola cuando vence
+  (se lee el claim `exp` del propio token).
+- Un interceptor agrega `Authorization: Bearer ...` y, si el servidor responde 401,
+  cierra la sesión y vuelve al inicio de sesión.
+- Menús, botones y rutas se muestran según el área (`nucleo/permisos.ts`), pero la
+  seguridad real la impone el servidor: aunque se fuerce la interfaz, responde 403.
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+### Reportes
 
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Los 12 reportes se describen en `paginas/reportes/definiciones.ts` (filtros,
+columnas, resumen y gráfica) y un único visor los presenta. Todos se pueden
+imprimir (en horizontal) y exportar a CSV compatible con Excel.

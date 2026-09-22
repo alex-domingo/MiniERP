@@ -106,7 +106,7 @@ public class ServicioReporteBitacora {
         var f = filtros("usuario", Texto.limpiar(usuario), "modulo", modulo, "accion", accion,
                 "exitoso", exitoso, "texto", Texto.limpiar(texto));
         rango.agregarA(f);
-        return respuesta("Bitacora de interacciones de los usuarios", f, resumen, filas,
+        return respuesta("Bitácora de interacciones de los usuarios", f, resumen, filas,
                 ReporteRespuesta.Pagina.de(pagina, tamano, t.total()));
     }
 }
